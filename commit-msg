@@ -1,12 +1,15 @@
 #!/usr/bin/env perl
+require Term::ANSIColor;
+use Term::ANSIColor qw(:constants);
+
 my $file = shift;
 
 if (`git symbolic-ref HEAD` =~ /trivial-/) {
     exit 0;
 }
 
-(my @projects = split /\n/, `git config --get-all ii.project`)
-    or die "Please set an ii.project like so:\n\n    git config --add ii.project IITOOLS\n\n(note: you can do this multiple times)\n";
+(my @projects = split /\n/, `git config --get-all jira.project`)
+    or die "Please set an jira.project like so:\n\n    git config --add jira.project MYPROJ\n\n(note: you can do this multiple times. Add --global to configure globally)\n";
 
 my $project_re = join '|', @projects;
 my $re = qr/($project_re)-\d+/i;
@@ -27,5 +30,5 @@ elsif ($first_line =~ /^\s*$/) {
     exit 0; # let git generate the "Aborted" message
 }
 else {
-    die "\e[1;31m*\n*\n*\nAborted! Your commit message's first line must reference a ticket " . join (' or ', map { "$_-###" } @projects) . " \n";
+    die RED, "Aborted! Your commit message's first line must reference a ticket from projects " . join (' or ', map { "$_" } @projects), RESET, "\n";    
 }
